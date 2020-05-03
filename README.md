@@ -1,4 +1,4 @@
-### Java class for watch android.util.Log
+### Java class for listening android.util.Log
 
 ##### Usage example
 
