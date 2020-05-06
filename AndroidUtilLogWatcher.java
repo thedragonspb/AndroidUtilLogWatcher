@@ -24,8 +24,9 @@ public class AndroidUtilLogWatcher extends Thread {
         Process logcat;
         BufferedReader br;
 
+        List<String> logsBuffer = new LinkedList<>();
+
         String currentLog;
-        String previousLog = "";
         Date previousLogTime = null;
 
         try {
@@ -39,10 +40,15 @@ public class AndroidUtilLogWatcher extends Thread {
                         if (currentLogTime.after(previousLogTime)
                         || currentLogTime.equals(previousLogTime)
                         ) {
-                            if (!previousLog.equals(currentLog)) {
+                            if (!logsBuffer.contains(currentLog)) {
+                                logsBuffer.add(currentLog);                                
                                 logWatcherListener.onListen(currentLog);
                             }
-                            previousLog = currentLog;
+                            
+                            if (logsBuffer.size() > 1000) {
+                                logsBuffer.remove(0);
+                            }
+                            
                             previousLogTime = currentLogTime;
                         }
                     } else {
@@ -50,11 +56,12 @@ public class AndroidUtilLogWatcher extends Thread {
                         previousLogTime = currentLogTime;
                     }
                 }
+                logsBuffer.clear();
                 br.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logWatcherListener.onStop();
+            stopWatching();
         }
     }
 
